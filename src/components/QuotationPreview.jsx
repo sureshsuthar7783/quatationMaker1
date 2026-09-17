@@ -211,17 +211,7 @@ function QuotationPreview({ business, customer, products, onBack }) {
                                 )}
                             </div>
 
-                            <div className="md:text-right">
-                                <p className="text-xs uppercase tracking-widest text-gray-400">
-                                    Quotation
-                                </p>
-                                <h3 className="text-2xl font-bold mt-1">
-                                    Q-0001
-                                </h3>
-                                <p className="text-sm text-gray-800 mt-2">
-                                    Date: {quotationDate}
-                                </p>
-                            </div>
+                           
                         </div>
 
                         {/* Customer */}
