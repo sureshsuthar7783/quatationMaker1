@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
 
-import QuotationPDF from "./QuotationPDF";
+import QuotationPDF from "./QuotationPdf";
 
 function QuotationPreview({
     business,
