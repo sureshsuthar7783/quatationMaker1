@@ -65,23 +65,7 @@ function QuotationPdf({
                     </div>
 
 
-                    {/* QUOTATION DETAILS */}
-
-                    <div className="text-right">
-
-                        <h3 className="text-2xl font-bold">
-                            QUOTATION
-                        </h3>
-
-                        <p className="text-sm text-gray-700 mt-2">
-                            Quotation No: Q-0001
-                        </p>
-
-                        <p className="text-sm text-gray-700 mt-1">
-                            Date: {quotationDate}
-                        </p>
-
-                    </div>
+                  
 
                 </div>
 

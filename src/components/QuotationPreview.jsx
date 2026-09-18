@@ -85,164 +85,86 @@ function QuotationPreview({
     // ============================
     // DOWNLOAD PDF
     // ============================
+    
+const handleDownloadPDF = async () => {
+    const element = quotationRef.current;
 
-    const handleDownloadPDF =
-        async () => {
+    if (!element) {
+        alert("Quotation preview not found.");
+        return;
+    }
 
-            const element =
-                quotationRef.current;
+    setDownloading(true);
 
-            if (!element) {
-                alert(
-                    "Quotation preview not found."
-                );
+    try {
+        // Wait for the browser to finish rendering
+        await new Promise((resolve) => setTimeout(resolve, 300));
 
-                return;
-            }
+        // Capture the quotation exactly as it appears in the browser
+        const canvas = await html2canvas(element, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: false,
+            backgroundColor: "#ffffff",
+            logging: false,
+            imageTimeout: 15000,
+        });
 
-            setDownloading(true);
+        const imgData = canvas.toDataURL("image/png", 1.0);
 
-            try {
+        /*
+         * Use the browser element's actual dimensions
+         * instead of forcing it into A4.
+         */
+        const elementWidth = element.scrollWidth;
+        const elementHeight = element.scrollHeight;
 
-                const canvas =
-                    await html2canvas(
-                        element,
-                        {
-                            scale: 2,
-                            useCORS: true,
-                            backgroundColor:
-                                "#ffffff",
-                            logging: false,
-                        }
-                    );
+        /*
+         * Convert pixels to millimeters.
+         * 96px = 25.4mm
+         */
+        const pxToMm = 25.4 / 96;
 
+        const pdfWidth = elementWidth * pxToMm;
+        const pdfHeight = elementHeight * pxToMm;
 
-                const imgData =
-                    canvas.toDataURL(
-                        "image/png"
-                    );
+        // Create PDF using the same aspect ratio as browser preview
+        const pdf = new jsPDF({
+            orientation: pdfWidth > pdfHeight ? "landscape" : "portrait",
+            unit: "mm",
+            format: [pdfWidth, pdfHeight],
+        });
 
+        pdf.addImage(
+            imgData,
+            "PNG",
+            0,
+            0,
+            pdfWidth,
+            pdfHeight,
+            undefined,
+            "FAST"
+        );
 
-                const pdf =
-                    new jsPDF(
-                        "p",
-                        "mm",
-                        "a4"
-                    );
+        // Safe customer name for filename
+        const customerName = (customer?.name || "Customer")
+            .trim()
+            .replace(/\s+/g, "_")
+            .replace(/[^a-zA-Z0-9_-]/g, "");
 
+        pdf.save(
+            `Quotation_Q-0001_${ customerName || "Customer" }.pdf`
+        );
 
-                const pdfWidth =
-                    pdf.internal.pageSize.getWidth();
-
-                const pdfHeight =
-                    pdf.internal.pageSize.getHeight();
-
-
-                const imgWidth =
-                    pdfWidth;
-
-                const imgHeight =
-                    (canvas.height *
-                        imgWidth) /
-                    canvas.width;
-
-
-                let heightLeft =
-                    imgHeight;
-
-                let position = 0;
-
-
-                // ============================
-                // FIRST PAGE
-                // ============================
-
-                pdf.addImage(
-                    imgData,
-                    "PNG",
-                    0,
-                    position,
-                    imgWidth,
-                    imgHeight
-                );
+    } catch (error) {
+        console.error("PDF generation failed:", error);
+        alert("Failed to generate PDF. Please try again.");
+    } finally {
+        setDownloading(false);
+    }
+};
 
 
-                heightLeft -=
-                    pdfHeight;
-
-
-                // ============================
-                // ADDITIONAL PAGES
-                // ============================
-
-                while (
-                    heightLeft > 0
-                ) {
-
-                    position =
-                        heightLeft -
-                        imgHeight;
-
-                    pdf.addPage();
-
-                    pdf.addImage(
-                        imgData,
-                        "PNG",
-                        0,
-                        position,
-                        imgWidth,
-                        imgHeight
-                    );
-
-                    heightLeft -=
-                        pdfHeight;
-                }
-
-
-                // ============================
-                // FILE NAME
-                // ============================
-
-                const customerName =
-                    (
-                        customer?.name ||
-                        "Customer"
-                    )
-                        .trim()
-                        .replace(
-                            /\s+/g,
-                            "_"
-                        )
-                        .replace(
-                            /[^a-zA-Z0-9_-]/g,
-                            ""
-                        );
-
-
-                pdf.save(
-                    `Quotation_Q-0001_${
-    customerName ||
-        "Customer"
-}.pdf`
-                );
-
-            } catch (error) {
-
-                console.error(
-                    "PDF generation failed:",
-                    error
-                );
-
-                alert(
-                    "Failed to generate PDF. Please try again."
-                );
-
-            } finally {
-
-                setDownloading(false);
-
-            }
-        };
 
 
     // ============================
