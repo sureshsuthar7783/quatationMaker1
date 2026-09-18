@@ -102,7 +102,7 @@ const handleDownloadPDF = async () => {
 
         // Capture the quotation exactly as it appears in the browser
         const canvas = await html2canvas(element, {
-            scale: 2,
+            scale: 4,
             useCORS: true,
             allowTaint: false,
             backgroundColor: "#ffffff",
