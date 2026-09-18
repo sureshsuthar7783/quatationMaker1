@@ -98,11 +98,13 @@ const handleDownloadPDF = async () => {
 
     try {
         // Wait for the browser to finish rendering
-        await new Promise((resolve) => setTimeout(resolve, 300));
+        await new Promise((resolve) =>
+            setTimeout(resolve, 500)
+        );
 
-        // Capture the quotation exactly as it appears in the browser
+        // Capture EXACT quotation preview
         const canvas = await html2canvas(element, {
-            scale: 4,
+            scale: 3,
             useCORS: true,
             allowTaint: false,
             backgroundColor: "#ffffff",
@@ -110,59 +112,101 @@ const handleDownloadPDF = async () => {
             imageTimeout: 15000,
         });
 
-        const imgData = canvas.toDataURL("image/png", 1.0);
+        const imgData = canvas.toDataURL(
+            "image/png",
+            1.0
+        );
+
+        // Original quotation aspect ratio
+        const imageWidth = canvas.width;
+        const imageHeight = canvas.height;
 
         /*
-         * Use the browser element's actual dimensions
-         * instead of forcing it into A4.
+         * Use A4 only as the maximum page size.
+         * The quotation itself keeps its original proportions.
          */
-        const elementWidth = element.scrollWidth;
-        const elementHeight = element.scrollHeight;
+        const A4_WIDTH = 210;
+        const A4_HEIGHT = 297;
 
-        /*
-         * Convert pixels to millimeters.
-         * 96px = 25.4mm
-         */
-        const pxToMm = 25.4 / 96;
+        const imageRatio =
+            imageWidth / imageHeight;
 
-        const pdfWidth = elementWidth * pxToMm;
-        const pdfHeight = elementHeight * pxToMm;
+        let pdfWidth;
+        let pdfHeight;
 
-        // Create PDF using the same aspect ratio as browser preview
+        if (imageRatio > A4_WIDTH / A4_HEIGHT) {
+            // Width is the limiting dimension
+            pdfWidth = A4_WIDTH;
+            pdfHeight =
+                pdfWidth / imageRatio;
+        } else {
+            // Height is the limiting dimension
+            pdfHeight = A4_HEIGHT;
+            pdfWidth =
+                pdfHeight * imageRatio;
+        }
+
+        // Center quotation on PDF page
+        const x =
+            (A4_WIDTH - pdfWidth) / 2;
+
+        const y =
+            (A4_HEIGHT - pdfHeight) / 2;
+
+        // Create normal A4 PDF
         const pdf = new jsPDF({
-            orientation: pdfWidth > pdfHeight ? "landscape" : "portrait",
+            orientation: "portrait",
             unit: "mm",
-            format: [pdfWidth, pdfHeight],
+            format: "a4",
         });
 
+        // Put the quotation into the PDF
+        // WITHOUT changing its aspect ratio
         pdf.addImage(
             imgData,
             "PNG",
-            0,
-            0,
+            x,
+            y,
             pdfWidth,
             pdfHeight,
             undefined,
-            "FAST"
+            "NONE"
         );
 
-        // Safe customer name for filename
-        const customerName = (customer?.name || "Customer")
-            .trim()
-            .replace(/\s+/g, "_")
-            .replace(/[^a-zA-Z0-9_-]/g, "");
+        // Customer name for filename
+        const customerName =
+            (customer?.name || "Customer")
+                .trim()
+                .replace(/\s+/g, "_")
+                .replace(
+                    /[^a-zA-Z0-9_-]/g,
+                    ""
+                );
 
         pdf.save(
-            `Quotation_Q-0001_${ customerName || "Customer" }.pdf`
+            `Quotation_Q-0001_${
+        customerName || "Customer"
+    }.pdf`
         );
 
     } catch (error) {
-        console.error("PDF generation failed:", error);
-        alert("Failed to generate PDF. Please try again.");
+
+        console.error(
+            "PDF generation failed:",
+            error
+        );
+
+        alert(
+            "Failed to generate PDF. Please try again."
+        );
+
     } finally {
+
         setDownloading(false);
+
     }
 };
+
 
 
 
