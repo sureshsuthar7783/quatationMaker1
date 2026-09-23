@@ -288,14 +288,14 @@ function QuotationPdf({
                     <View style={styles.totalRow}>
                         <Text>Subtotal</Text>
                         <Text>
-                            Rs.{subtotal.toLocaleString("en-IN")}
+                            {subtotal.toLocaleString("en-IN")}
                         </Text>
                     </View>
 
                     <View style={styles.totalRow}>
                         <Text>Discount</Text>
                         <Text>
-                            ₹{discount.toLocaleString("en-IN")}
+                            {discount.toLocaleString("en-IN")}
                         </Text>
                     </View>
 
@@ -305,7 +305,7 @@ function QuotationPdf({
                         </Text>
 
                         <Text>
-                            ₹{gstAmount.toLocaleString("en-IN")}
+                            {gstAmount.toLocaleString("en-IN")}
                         </Text>
                     </View>
 
@@ -315,7 +315,7 @@ function QuotationPdf({
                         </Text>
 
                         <Text>
-                            ₹{total.toLocaleString("en-IN")}
+                            {total.toLocaleString("en-IN")}
                         </Text>
                     </View>
 
