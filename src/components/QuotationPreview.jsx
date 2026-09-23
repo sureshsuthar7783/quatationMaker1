@@ -1,9 +1,6 @@
-
-import { useRef, useState } from "react";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas-pro";
-
-import QuotationPDF from "./QuotationPdf";
+import { useState } from "react";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import QuotationPdf from "./QuotationPdf";
 
 function QuotationPreview({
     business,
@@ -12,12 +9,6 @@ function QuotationPreview({
     onBack,
 }) {
     const [addGST, setAddGST] = useState(false);
-    const [downloading, setDownloading] = useState(false);
-    const [sharing, setSharing] = useState(false);
-
-    // This ref points to the actual quotation
-    const quotationRef = useRef(null);
-
 
     // ============================
     // GST
@@ -32,7 +23,6 @@ function QuotationPreview({
 
     const subtotal = products.reduce(
         (total, product) => {
-
             const measurement =
                 product.squareFeet
                     ? Number(product.squareFeet)
@@ -41,7 +31,7 @@ function QuotationPreview({
             return (
                 total +
                 measurement *
-                    Number(product.rate || 0)
+                Number(product.rate || 0)
             );
         },
         0
@@ -58,8 +48,7 @@ function QuotationPreview({
         subtotal - discount;
 
     const gstAmount =
-        taxableAmount *
-        (gstRate / 100);
+        taxableAmount * (gstRate / 100);
 
     const total =
         taxableAmount + gstAmount;
@@ -72,479 +61,470 @@ function QuotationPreview({
     const today = new Date();
 
     const quotationDate =
-        today.toLocaleDateString(
-            "en-IN",
-            {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-            }
-        );
-
-
-    // ============================
-    // DOWNLOAD PDF
-    // ============================
-    
-const handleDownloadPDF = async () => {
-    const element = quotationRef.current;
-
-    if (!element) {
-        alert("Quotation preview not found.");
-        return;
-    }
-
-    setDownloading(true);
-
-    try {
-        // Wait for the browser to finish rendering
-        await new Promise((resolve) =>
-            setTimeout(resolve, 500)
-        );
-
-        // Capture EXACT quotation preview
-        const canvas = await html2canvas(element, {
-            scale: 3,
-            useCORS: true,
-            allowTaint: false,
-            backgroundColor: "#ffffff",
-            logging: false,
-            imageTimeout: 15000,
+        today.toLocaleDateString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
         });
 
-        const imgData = canvas.toDataURL(
-            "image/png",
-            1.0
-        );
 
-        // Original quotation aspect ratio
-        const imageWidth = canvas.width;
-        const imageHeight = canvas.height;
+    return (
+        <div className="min-h-screen bg-[#080808] text-white px-4 py-8">
 
-        /*
-         * Use A4 only as the maximum page size.
-         * The quotation itself keeps its original proportions.
-         */
-        const A4_WIDTH = 210;
-        const A4_HEIGHT = 297;
+            <div className="max-w-5xl mx-auto">
 
-        const imageRatio =
-            imageWidth / imageHeight;
 
-        let pdfWidth;
-        let pdfHeight;
-
-        if (imageRatio > A4_WIDTH / A4_HEIGHT) {
-            // Width is the limiting dimension
-            pdfWidth = A4_WIDTH;
-            pdfHeight =
-                pdfWidth / imageRatio;
-        } else {
-            // Height is the limiting dimension
-            pdfHeight = A4_HEIGHT;
-            pdfWidth =
-                pdfHeight * imageRatio;
-        }
-
-        // Center quotation on PDF page
-        const x =
-            (A4_WIDTH - pdfWidth) / 2;
-
-        const y =
-            (A4_HEIGHT - pdfHeight) / 2;
-
-        // Create normal A4 PDF
-        const pdf = new jsPDF({
-            orientation: "portrait",
-            unit: "mm",
-            format: "a4",
-        });
-
-        // Put the quotation into the PDF
-        // WITHOUT changing its aspect ratio
-        pdf.addImage(
-            imgData,
-            "PNG",
-            x,
-            y,
-            pdfWidth,
-            pdfHeight,
-            undefined,
-            "NONE"
-        );
-
-        // Customer name for filename
-        const customerName =
-            (customer?.name || "Customer")
-                .trim()
-                .replace(/\s+/g, "_")
-                .replace(
-                    /[^a-zA-Z0-9_-]/g,
-                    ""
-                );
-
-        pdf.save(
-            `Quotation_Q-0001_${
-        customerName || "Customer"
-    }.pdf`
-        );
-
-    } catch (error) {
-
-        console.error(
-            "PDF generation failed:",
-            error
-        );
-
-        alert(
-            "Failed to generate PDF. Please try again."
-        );
-
-    } finally {
-
-        setDownloading(false);
-
-    }
-};
-
-
-
-
-
-    // ============================
-    // WHATSAPP SHARE
-    // ============================
-
-    const handleWhatsAppShare =
-        async () => {
-
-            const element =
-                quotationRef.current;
-
-            if (!element) {
-                alert(
-                    "Quotation preview not found."
-                );
-
-                return;
-            }
-
-            setSharing(true);
-
-            try {
-
-                const canvas =
-                    await html2canvas(
-                        element,
-                        {
-                            scale: 2,
-                            useCORS: true,
-                            backgroundColor:
-                                "#ffffff",
-                            logging: false,
-                        }
-                    );
-
-
-                const blob =
-                    await new Promise(
-                        (resolve) =>
-                            canvas.toBlob(
-                                resolve,
-                                "image/png"
-                            )
-                    );
-
-
-                if (!blob) {
-                    throw new Error(
-                        "Could not create image."
-                    );
-                }
-
-
-                const fileName =
-                    `Quotation_Q-0001_${
-    (
-        customer?.name ||
-        "Customer"
-    )
-        .trim()
-        .replace(
-            /\s+/g,
-            "_"
-        )
-}.png`;
-
-
-                const file =
-                    new File(
-                        [blob],
-                        fileName,
-                        {
-                            type:
-                                "image/png",
-                        }
-                    );
-
-
-                // ============================
-                // NATIVE SHARE
-                // ============================
-
-                if (
-                    navigator.canShare &&
-                    navigator.canShare({
-                        files: [file],
-                    })
-                ) {
-
-                    try {
-
-                        await navigator.share({
-                            files: [file],
-                            title:
-                                "Quotation",
-                            text:
-                                `Quotation for ${
-    customer?.name ||
-    "Customer"
-                                } — Total ₹${
-    total.toLocaleString(
-        "en-IN"
-    )
-} `,
-                        });
-
-                        return;
-
-                    } catch (error) {
-
-                        if (
-                            error.name ===
-                            "AbortError"
-                        ) {
-                            return;
-                        }
-
-                        console.warn(
-                            "Native share failed:",
-                            error
-                        );
-                    }
-                }
-
-
-                // ============================
-                // WHATSAPP FALLBACK
-                // ============================
-
-                const message =
-                    encodeURIComponent(
-                        `Hello ${
-    customer?.name ||
-        ""
-}, \n\n` +
-                        `Please find your quotation below.\n\n` +
-                        `Total Amount: ₹${
-    total.toLocaleString(
-        "en-IN"
-    )
-} \n\n` +
-                        `Thank you for your business!`
-                    );
-
-
-                window.open(
-                    `https://wa.me/?text=${message}`,
-    "_blank"
-                );
-
-            } catch (error) {
-
-    console.error(
-        "WhatsApp share failed:",
-        error
-    );
-
-    alert(
-        "Failed to share. Please try again."
-    );
-
-} finally {
-
-    setSharing(false);
-
-}
-        };
-
-
-// ============================
-// UI
-// ============================
-
-return (
-
-    <div className="min-h-screen bg-[#080808] text-white p-6">
-
-        <div className="max-w-5xl mx-auto">
-
-
-            {/* ============================
-                    PAGE HEADER
+                {/* ============================
+                    TOP HEADER
                 ============================ */}
 
-            <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5 mb-8">
 
-                <div>
+                    <div>
+                        <h1 className="text-3xl font-bold">
+                            Quotation Preview
+                        </h1>
 
-                    <h1 className="text-3xl font-bold">
-                        Quotation Preview
-                    </h1>
+                        <p className="text-gray-400 mt-2">
+                            Review your quotation before downloading.
+                        </p>
+                    </div>
 
-                    <p className="text-gray-400 mt-2">
-                        Review your quotation before downloading it.
-                    </p>
+
+                    <button
+                        onClick={onBack}
+                        className="
+                            border border-white/10
+                            bg-white/[0.04]
+                            hover:bg-white/[0.08]
+                            px-5 py-3
+                            rounded-xl
+                            text-gray-300
+                            transition
+                        "
+                    >
+                        ← Edit Products
+                    </button>
 
                 </div>
 
 
-                <button
-                    onClick={onBack}
-                    className="border border-white/10 bg-white/[0.04] px-5 py-3 rounded-xl text-gray-300 hover:bg-white/[0.08] transition"
-                >
-                    ← Edit Products
-                </button>
-
-            </div>
-
-
-            {/* ==================================================
-                    SAME QUOTATION SHOWN ON SCREEN AND USED FOR PDF
-                ================================================== */}
-
-            <QuotationPDF
-                quotationRef={quotationRef}
-                business={business}
-                customer={customer}
-                products={products}
-                quotationDate={quotationDate}
-                subtotal={subtotal}
-                discount={discount}
-                gstRate={gstRate}
-                gstAmount={gstAmount}
-                total={total}
-            />
-
-
-            {/* ============================
-                    ACTION BUTTONS
+                {/* ============================
+                    QUOTATION PREVIEW
                 ============================ */}
 
-            <div className="mt-6 flex flex-col md:flex-row gap-4">
+                <div className="bg-white text-[#222] rounded-2xl shadow-2xl overflow-hidden">
+
+                    <div className="p-6 sm:p-8 md:p-10">
 
 
-                {/* DOWNLOAD PDF */}
+                        {/* ============================
+                            HEADER
+                        ============================ */}
 
-                <button
-                    onClick={
-                        handleDownloadPDF
-                    }
-                    disabled={
-                        downloading
-                    }
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-3 rounded-2xl transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
+                        <div className="flex flex-col sm:flex-row justify-between gap-8">
 
-                    {downloading ? (
-                        "Generating PDF..."
-                    ) : (
-                        <>
-                            📥 Download PDF
-                        </>
-                    )}
+                            {/* BUSINESS */}
 
-                </button>
+                            <div>
 
+                                <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+                                    {business?.name ||
+                                        "Your Business"}
+                                </h2>
 
-                {/* WHATSAPP */}
+                                {business?.address && (
+                                    <p className="text-gray-500 text-sm mt-2">
+                                        {business.address}
+                                    </p>
+                                )}
 
-                <button
-                    onClick={
-                        handleWhatsAppShare
-                    }
-                    disabled={
-                        sharing
-                    }
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-3 rounded-2xl transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
+                                {business?.phone && (
+                                    <p className="text-gray-500 text-sm mt-1">
+                                        {business.phone}
+                                    </p>
+                                )}
 
-                    {sharing
-                        ? "Preparing..."
-                        : "🟢 Share on WhatsApp"}
+                                {business?.email && (
+                                    <p className="text-gray-500 text-sm mt-1">
+                                        {business.email}
+                                    </p>
+                                )}
 
-                </button>
-
-            </div>
+                            </div>
 
 
-            {/* ============================
-                    GST CONTROL
-                ============================ */}
+                            {/* QUOTATION INFO */}
 
-            <div className="mt-6 bg-white/[0.04] border border-white/10 rounded-2xl p-6">
+                            <div className="sm:text-right">
 
-                <h3 className="text-lg font-semibold">
+                                <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+                                    QUOTATION
+                                </h1>
+
+                                <p className="text-gray-500 text-sm mt-2">
+                                    Date: {quotationDate}
+                                </p>
+
+                                <p className="text-gray-500 text-sm mt-1">
+                                    Quote No: Q-0001
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        {/* LINE */}
+
+                        <div className="border-t border-gray-200 my-8" />
+
+
+                        {/* ============================
+                            CUSTOMER
+                        ============================ */}
+
+                        <div className="mb-8">
+
+                            <p className="text-xs font-semibold text-gray-400 tracking-widest mb-2">
+                                BILL TO
+                            </p>
+
+                            <h3 className="text-lg font-bold">
+                                {customer?.name ||
+                                    "Customer"}
+                            </h3>
+
+                            {customer?.phone && (
+                                <p className="text-sm text-gray-500 mt-1">
+                                    {customer.phone}
+                                </p>
+                            )}
+
+                            {customer?.email && (
+                                <p className="text-sm text-gray-500 mt-1">
+                                    {customer.email}
+                                </p>
+                            )}
+
+                            {customer?.address && (
+                                <p className="text-sm text-gray-500 mt-1">
+                                    {customer.address}
+                                </p>
+                            )}
+
+                        </div>
+
+
+                        {/* ============================
+                            PRODUCTS TABLE
+                        ============================ */}
+
+                        <div className="overflow-x-auto">
+
+                            <table className="w-full text-sm">
+
+                                <thead>
+
+                                    <tr className="bg-[#111] text-white">
+
+                                        <th className="text-left px-4 py-3 rounded-l-lg">
+                                            Product
+                                        </th>
+
+                                        <th className="text-center px-4 py-3">
+                                            Qty
+                                        </th>
+
+                                        <th className="text-right px-4 py-3">
+                                            Rate
+                                        </th>
+
+                                        <th className="text-right px-4 py-3 rounded-r-lg">
+                                            Amount
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody>
+
+                                    {products.map(
+                                        (product, index) => {
+
+                                            const measurement =
+                                                product.squareFeet
+                                                    ? Number(
+                                                        product.squareFeet
+                                                    )
+                                                    : Number(
+                                                        product.quantity || 0
+                                                    );
+
+                                            const rate =
+                                                Number(
+                                                    product.rate || 0
+                                                );
+
+                                            const amount =
+                                                measurement * rate;
+
+                                            return (
+                                                <tr
+                                                    key={index}
+                                                    className="border-b border-gray-100"
+                                                >
+
+                                                    <td className="px-4 py-4 font-medium">
+                                                        {product.name}
+                                                    </td>
+
+                                                    <td className="px-4 py-4 text-center text-gray-600">
+                                                        {measurement}
+                                                    </td>
+
+                                                    <td className="px-4 py-4 text-right text-gray-600">
+                                                        ₹
+                                                        {rate.toLocaleString(
+                                                            "en-IN"
+                                                        )}
+                                                    </td>
+
+                                                    <td className="px-4 py-4 text-right font-medium">
+                                                        ₹
+                                                        {amount.toLocaleString(
+                                                            "en-IN"
+                                                        )}
+                                                    </td>
+
+                                                </tr>
+                                            );
+                                        }
+                                    )}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+
+                        {/* ============================
+                            TOTALS
+                        ============================ */}
+
+                        <div className="flex justify-end mt-8">
+
+                            <div className="w-full sm:w-80">
+
+                                <div className="flex justify-between py-2 text-sm">
+
+                                    <span className="text-gray-500">
+                                        Subtotal
+                                    </span>
+
+                                    <span>
+                                        ₹
+                                        {subtotal.toLocaleString(
+                                            "en-IN"
+                                        )}
+                                    </span>
+
+                                </div>
+
+
+                                <div className="flex justify-between py-2 text-sm">
+
+                                    <span className="text-gray-500">
+                                        Discount
+                                    </span>
+
+                                    <span>
+                                        ₹
+                                        {discount.toLocaleString(
+                                            "en-IN"
+                                        )}
+                                    </span>
+
+                                </div>
+
+
+                                <div className="flex justify-between py-2 text-sm">
+
+                                    <span className="text-gray-500">
+                                        GST ({gstRate}%)
+                                    </span>
+
+                                    <span>
+                                        ₹
+                                        {gstAmount.toLocaleString(
+                                            "en-IN"
+                                        )}
+                                    </span>
+
+                                </div>
+
+
+                                <div className="border-t border-gray-200 mt-3 pt-4 flex justify-between">
+
+                                    <span className="text-lg font-bold">
+                                        TOTAL
+                                    </span>
+
+                                    <span className="text-lg font-bold">
+                                        ₹
+                                        {total.toLocaleString(
+                                            "en-IN"
+                                        )}
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        {/* ============================
+                            FOOTER
+                        ============================ */}
+
+                        <div className="border-t border-gray-200 mt-12 pt-5">
+
+                            <p className="text-sm font-medium">
+                                Thank you for your business!
+                            </p>
+
+                            <p className="text-xs text-gray-400 mt-1">
+                                This quotation is system generated.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                {/* ============================
                     GST
-                </h3>
+                ============================ */}
 
-                <p className="text-sm text-gray-400 mt-1">
-                    Choose whether GST should be included.
-                </p>
+                <div className="mt-6 bg-white/[0.04] border border-white/10 rounded-2xl p-6">
+
+                    <h3 className="text-lg font-semibold">
+                        GST
+                    </h3>
+
+                    <p className="text-sm text-gray-400 mt-1">
+                        Choose whether GST should be included.
+                    </p>
 
 
-                <div className="flex gap-3 mt-5">
+                    <div className="flex gap-3 mt-5">
+
+                        <button
+                            onClick={() =>
+                                setAddGST(true)
+                            }
+                            className={`
+                                px-6 py-3
+                                rounded-xl
+                                border
+                                transition
+                                font-medium
+                                ${addGST
+                                    ? "bg-white text-black border-white"
+                                    : "bg-white/[0.04] text-gray-400 border-white/10 hover:bg-white/[0.08]"
+                                }
+                            `}
+                        >
+                            Yes — 18%
+                        </button>
 
 
-                    {/* YES */}
+                        <button
+                            onClick={() =>
+                                setAddGST(false)
+                            }
+                            className={`
+                                px-6 py-3
+                                rounded-xl
+                                border
+                                transition
+                                font-medium
+                                ${!addGST
+                                    ? "bg-white text-black border-white"
+                                    : "bg-white/[0.04] text-gray-400 border-white/10 hover:bg-white/[0.08]"
+                                }
+                            `}
+                        >
+                            No — 0%
+                        </button>
 
-                    <button
-                        onClick={() =>
-                            setAddGST(true)
+                    </div>
+
+                </div>
+
+
+                {/* ============================
+                    DOWNLOAD
+                ============================ */}
+
+                <div className="mt-6">
+
+                    <PDFDownloadLink
+                        document={
+                            <QuotationPdf
+                                business={business}
+                                customer={customer}
+                                products={products}
+                                quotationDate={quotationDate}
+                                subtotal={subtotal}
+                                discount={discount}
+                                gstRate={gstRate}
+                                gstAmount={gstAmount}
+                                total={total}
+                            />
                         }
-                        className={`px-6 py-3 rounded-xl border transition font-medium ${addGST
-                                ? "bg-white text-black border-white"
-                                : "bg-white/[0.04] text-gray-400 border-white/10 hover:bg-white/[0.08]"
-                            }`}
+                        fileName={`Quotation_Q-0001_${customer?.name
+                                ?.trim()
+                                .replace(/\s+/g, "_")
+                                .replace(
+                                    /[^a-zA-Z0-9_-]/g,
+                                    ""
+                                ) ||
+                            "Customer"
+                            }.pdf`}
+                        className="
+                            block
+                            w-full
+                            text-center
+                            bg-blue-600
+                            hover:bg-blue-700
+                            text-white
+                            font-semibold
+                            px-5
+                            py-4
+                            rounded-2xl
+                            transition
+                        "
                     >
-                        Yes — 18%
-                    </button>
-
-
-                    {/* NO */}
-
-                    <button
-                        onClick={() =>
-                            setAddGST(false)
+                        {({ loading }) =>
+                            loading
+                                ? "Generating PDF..."
+                                : "📥 Download PDF"
                         }
-                        className={`px-6 py-3 rounded-xl border transition font-medium ${!addGST
-                                ? "bg-white text-black border-white"
-                                : "bg-white/[0.04] text-gray-400 border-white/10 hover:bg-white/[0.08]"
-                            }`}
-                    >
-                        No — 0%
-                    </button>
+                    </PDFDownloadLink>
 
                 </div>
 
             </div>
 
         </div>
-
-    </div>
-);
+    );
 }
 
-
 export default QuotationPreview;
-

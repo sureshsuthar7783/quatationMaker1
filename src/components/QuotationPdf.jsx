@@ -1,6 +1,134 @@
+import {
+    Document,
+    Page,
+    Text,
+    View,
+    StyleSheet,
+} from "@react-pdf/renderer";
+
+const styles = StyleSheet.create({
+    page: {
+        padding: 40,
+        fontSize: 10,
+        fontFamily: "Helvetica",
+        color: "#222",
+    },
+
+    header: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: 25,
+    },
+
+    businessName: {
+        fontSize: 22,
+        fontWeight: "bold",
+    },
+
+    quotationTitle: {
+        fontSize: 24,
+        fontWeight: "bold",
+        textAlign: "right",
+    },
+
+    smallText: {
+        fontSize: 9,
+        color: "#666",
+        marginTop: 4,
+    },
+
+    line: {
+        borderBottomWidth: 1,
+        borderBottomColor: "#dddddd",
+        marginVertical: 15,
+    },
+
+    customerSection: {
+        marginBottom: 20,
+    },
+
+    sectionTitle: {
+        fontSize: 9,
+        color: "#777",
+        marginBottom: 6,
+    },
+
+    customerName: {
+        fontSize: 13,
+        fontWeight: "bold",
+    },
+
+    table: {
+        marginTop: 10,
+    },
+
+    tableHeader: {
+        flexDirection: "row",
+        backgroundColor: "#111",
+        color: "#fff",
+        padding: 8,
+    },
+
+    tableRow: {
+        flexDirection: "row",
+        borderBottomWidth: 1,
+        borderBottomColor: "#eeeeee",
+        padding: 8,
+    },
+
+    product: {
+        width: "40%",
+    },
+
+    quantity: {
+        width: "15%",
+        textAlign: "center",
+    },
+
+    rate: {
+        width: "20%",
+        textAlign: "right",
+    },
+
+    amount: {
+        width: "25%",
+        textAlign: "right",
+    },
+
+    totals: {
+        marginTop: 20,
+        marginLeft: "55%",
+    },
+
+    totalRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: 7,
+    },
+
+    grandTotal: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        borderTopWidth: 1,
+        borderTopColor: "#111",
+        paddingTop: 10,
+        marginTop: 5,
+        fontSize: 14,
+        fontWeight: "bold",
+    },
+
+    footer: {
+        position: "absolute",
+        bottom: 30,
+        left: 40,
+        right: 40,
+        borderTopWidth: 1,
+        borderTopColor: "#eeeeee",
+        paddingTop: 10,
+    },
+});
 
 function QuotationPdf({
-    quotationRef,
     business,
     customer,
     products,
@@ -12,289 +140,206 @@ function QuotationPdf({
     total,
 }) {
     return (
-        <div
-            ref={quotationRef}
-            className="bg-white text-black rounded-2xl overflow-hidden shadow-2xl"
-        >
-            {/* ============================
-                QUOTATION CONTENT
-            ============================ */}
+        <Document>
 
-            <div className="p-8 md:p-10">
+            <Page size="A4" style={styles.page}>
 
-                {/* BUSINESS + QUOTATION INFO */}
+                {/* HEADER */}
 
-                <div className="flex flex-col md:flex-row justify-between gap-8">
+                <View style={styles.header}>
 
-                    {/* BUSINESS */}
+                    <View>
+                        <Text style={styles.businessName}>
+                            {business?.name || "Your Business"}
+                        </Text>
 
-                    <div>
-                        <h2 className="text-2xl font-bold">
-                            {business.name || "Your Business"}
-                        </h2>
+                        <Text style={styles.smallText}>
+                            {business?.address || ""}
+                        </Text>
 
-                        {business.address && (
-                            <p className="text-sm text-gray-800 mt-2 max-w-sm">
-                                {business.address}
-                            </p>
-                        )}
+                        <Text style={styles.smallText}>
+                            {business?.phone || ""}
+                        </Text>
 
-                        {business.phone && (
-                            <p className="text-sm text-gray-800 mt-1">
-                                {business.phone}
-                            </p>
-                        )}
+                        <Text style={styles.smallText}>
+                            {business?.email || ""}
+                        </Text>
+                    </View>
 
-                        {business.email && (
-                            <p className="text-sm text-gray-800 mt-1">
-                                {business.email}
-                            </p>
-                        )}
+                    <View>
+                        <Text style={styles.quotationTitle}>
+                            QUOTATION
+                        </Text>
 
-                        {business.gst && (
-                            <p className="text-sm text-gray-800 mt-1">
-                                GSTIN: {business.gst}
-                            </p>
-                        )}
+                        <Text style={styles.smallText}>
+                            Date: {quotationDate}
+                        </Text>
 
-                        {business.website && (
-                            <p className="text-sm text-gray-800 mt-1">
-                                {business.website}
-                            </p>
-                        )}
-                    </div>
+                        <Text style={styles.smallText}>
+                            Quote No: Q-0001
+                        </Text>
+                    </View>
+
+                </View>
 
 
-                  
-
-                </div>
+                <View style={styles.line} />
 
 
-                {/* ============================
-                    CUSTOMER
-                ============================ */}
+                {/* CUSTOMER */}
 
-                <div className="mt-10 pt-6 border-t border-gray-200">
+                <View style={styles.customerSection}>
 
-                    <p className="text-xs uppercase tracking-widest text-gray-800">
-                        Bill To
-                    </p>
+                    <Text style={styles.sectionTitle}>
+                        BILL TO
+                    </Text>
 
-                    <h3 className="font-semibold text-lg mt-2">
-                        {customer.name || "Customer Name"}
-                    </h3>
+                    <Text style={styles.customerName}>
+                        {customer?.name || "Customer"}
+                    </Text>
 
-                    {customer.phone && (
-                        <p className="text-sm text-gray-800 mt-1">
-                            {customer.phone}
-                        </p>
-                    )}
+                    <Text style={styles.smallText}>
+                        {customer?.phone || ""}
+                    </Text>
 
-                    {customer.email && (
-                        <p className="text-sm text-gray-800 mt-1">
-                            {customer.email}
-                        </p>
-                    )}
+                    <Text style={styles.smallText}>
+                        {customer?.email || ""}
+                    </Text>
 
-                    {customer.address && (
-                        <p className="text-sm text-gray-800 mt-1">
-                            {customer.address}
-                        </p>
-                    )}
+                    <Text style={styles.smallText}>
+                        {customer?.address || ""}
+                    </Text>
 
-                    {customer.gst && (
-                        <p className="text-sm text-gray-800 mt-1">
-                            GSTIN: {customer.gst}
-                        </p>
-                    )}
-
-                </div>
+                </View>
 
 
-                {/* ============================
-                    PRODUCTS
-                ============================ */}
+                {/* PRODUCTS */}
 
-                <div className="mt-10">
+                <View style={styles.table}>
 
-                    {/* TABLE HEADER */}
+                    <View style={styles.tableHeader}>
 
-                    <div className="grid grid-cols-12 gap-4 bg-gray-100 rounded-lg px-4 py-3 text-xs font-semibold text-gray-800 uppercase">
+                        <Text style={styles.product}>
+                            Product
+                        </Text>
 
-                        <div className="col-span-5">
-                            Product / Service
-                        </div>
-
-                        <div className="col-span-2">
+                        <Text style={styles.quantity}>
                             Qty
-                        </div>
+                        </Text>
 
-                        <div className="col-span-2">
-                            Sq.Ft
-                        </div>
-
-                        <div className="col-span-1">
+                        <Text style={styles.rate}>
                             Rate
-                        </div>
+                        </Text>
 
-                        <div className="col-span-2 text-right">
+                        <Text style={styles.amount}>
                             Amount
-                        </div>
+                        </Text>
 
-                    </div>
-
-
-                    {/* PRODUCT ROWS */}
-
-                    <div>
-
-                        {products.map((product, index) => {
-
-                            const measurement =
-                                product.squareFeet
-                                    ? Number(product.squareFeet)
-                                    : Number(product.quantity || 0);
-
-                            const amount =
-                                measurement *
-                                Number(product.rate || 0);
-
-                            return (
-                                <div
-                                    key={index}
-                                    className="grid grid-cols-12 gap-4 px-4 py-5 border-b border-gray-200 text-sm"
-                                >
-
-                                    <div className="col-span-5 font-medium">
-                                        {product.name || "Product"}
-                                    </div>
-
-                                    <div className="col-span-2 text-gray-800">
-                                        {product.squareFeet
-                                            ? "—"
-                                            : product.quantity}
-                                    </div>
-
-                                    <div className="col-span-2 text-gray-800">
-                                        {product.squareFeet
-                                            ? product.squareFeet
-                                            : "—"}
-                                    </div>
-
-                                    <div className="col-span-1 text-gray-800">
-                                        ₹
-                                        {Number(
-                                            product.rate || 0
-                                        ).toLocaleString("en-IN")}
-                                    </div>
-
-                                    <div className="col-span-2 text-right font-medium">
-                                        ₹
-                                        {amount.toLocaleString("en-IN")}
-                                    </div>
-
-                                </div>
-                            );
-                        })}
-
-                    </div>
-
-                </div>
+                    </View>
 
 
-                {/* ============================
-                    SUMMARY
-                ============================ */}
+                    {products.map((product, index) => {
 
-                <div className="flex justify-end mt-8">
+                        const measurement =
+                            product.squareFeet
+                                ? Number(product.squareFeet)
+                                : Number(product.quantity || 0);
 
-                    <div className="w-full md:w-80">
+                        const rate =
+                            Number(product.rate || 0);
 
-                        {/* SUBTOTAL */}
+                        const amount =
+                            measurement * rate;
 
-                        <div className="flex justify-between py-2 text-sm">
+                        return (
+                            <View
+                                style={styles.tableRow}
+                                key={index}
+                            >
 
-                            <span className="text-gray-800">
-                                Subtotal
-                            </span>
+                                <Text style={styles.product}>
+                                    {product.name}
+                                </Text>
 
-                            <span>
-                                ₹
-                                {subtotal.toLocaleString("en-IN")}
-                            </span>
+                                <Text style={styles.quantity}>
+                                    {measurement}
+                                </Text>
 
-                        </div>
+                                <Text style={styles.rate}>
+                                    ₹{rate.toLocaleString("en-IN")}
+                                </Text>
 
+                                <Text style={styles.amount}>
+                                    ₹{amount.toLocaleString("en-IN")}
+                                </Text>
 
-                        {/* DISCOUNT */}
+                            </View>
+                        );
 
-                        <div className="flex justify-between py-2 text-sm">
+                    })}
 
-                            <span className="text-gray-800">
-                                Discount
-                            </span>
-
-                            <span>
-                                -₹
-                                {discount.toLocaleString("en-IN")}
-                            </span>
-
-                        </div>
-
-
-                        {/* GST */}
-
-                        <div className="flex justify-between py-2 text-sm">
-
-                            <span className="text-gray-800">
-                                GST ({gstRate}%)
-                            </span>
-
-                            <span>
-                                ₹
-                                {gstAmount.toLocaleString("en-IN")}
-                            </span>
-
-                        </div>
+                </View>
 
 
-                        {/* TOTAL */}
+                {/* TOTALS */}
 
-                        <div className="border-t border-gray-300 mt-3 pt-4 flex justify-between">
+                <View style={styles.totals}>
 
-                            <span className="text-lg font-bold">
-                                Total
-                            </span>
+                    <View style={styles.totalRow}>
+                        <Text>Subtotal</Text>
+                        <Text>
+                            ₹{subtotal.toLocaleString("en-IN")}
+                        </Text>
+                    </View>
 
-                            <span className="text-2xl font-bold">
-                                ₹
-                                {total.toLocaleString("en-IN")}
-                            </span>
+                    <View style={styles.totalRow}>
+                        <Text>Discount</Text>
+                        <Text>
+                            ₹{discount.toLocaleString("en-IN")}
+                        </Text>
+                    </View>
 
-                        </div>
+                    <View style={styles.totalRow}>
+                        <Text>
+                            GST ({gstRate}%)
+                        </Text>
 
-                    </div>
+                        <Text>
+                            ₹{gstAmount.toLocaleString("en-IN")}
+                        </Text>
+                    </View>
 
-                </div>
+                    <View style={styles.grandTotal}>
+                        <Text>
+                            TOTAL
+                        </Text>
 
-            </div>
+                        <Text>
+                            ₹{total.toLocaleString("en-IN")}
+                        </Text>
+                    </View>
+
+                </View>
 
 
-            {/* ============================
-                FOOTER
-            ============================ */}
+                {/* FOOTER */}
 
-            <div className="bg-gray-50 border-t border-gray-200 px-8 py-5">
+                <View style={styles.footer}>
 
-                <p className="text-lg font-bold text-green-600 text-center">
-                    Thank you for your business!
-                </p>
+                    <Text>
+                        Thank you for your business!
+                    </Text>
 
-            </div>
+                    <Text style={styles.smallText}>
+                        This quotation is system generated.
+                    </Text>
 
-        </div>
+                </View>
+
+            </Page>
+
+        </Document>
     );
 }
 
 export default QuotationPdf;
-
