@@ -266,11 +266,11 @@ function QuotationPdf({
                                 </Text>
 
                                 <Text style={styles.rate}>
-                                    ₹{rate.toLocaleString("en-IN")}
+                                    Rs.{rate.toLocaleString("en-IN")}
                                 </Text>
 
                                 <Text style={styles.amount}>
-                                    ₹{amount.toLocaleString("en-IN")}
+                                    Rs.{amount.toLocaleString("en-IN")}
                                 </Text>
 
                             </View>
@@ -288,7 +288,7 @@ function QuotationPdf({
                     <View style={styles.totalRow}>
                         <Text>Subtotal</Text>
                         <Text>
-                            ₹{subtotal.toLocaleString("en-IN")}
+                            Rs.{subtotal.toLocaleString("en-IN")}
                         </Text>
                     </View>
 
@@ -327,11 +327,16 @@ function QuotationPdf({
                 <View style={styles.footer}>
 
                     <Text>
-                        Thank you for your business!
+                        Thank you So Much!!!
                     </Text>
 
                     <Text style={styles.smallText}>
-                        This quotation is system generated.
+                        It truly feels amazing to work with you. 
+                        <br />I’m genuinely grateful for this journey 
+                        <br />and for everything
+                        <br /> I’m learning along the way. ❤️
+
+
                     </Text>
 
                 </View>
