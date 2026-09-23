@@ -288,14 +288,14 @@ function QuotationPreview({
                                                     </td>
 
                                                     <td className="px-4 py-4 text-right text-gray-600">
-                                                        ₹
+                                                        
                                                         {rate.toLocaleString(
                                                             "en-IN"
                                                         )}
                                                     </td>
 
                                                     <td className="px-4 py-4 text-right font-medium">
-                                                        ₹
+                                                        
                                                         {amount.toLocaleString(
                                                             "en-IN"
                                                         )}
