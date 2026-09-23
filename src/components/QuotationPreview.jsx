@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import QuotationPdf from "./QuotationPdf";
+import { MessageCircle } from "lucide-react";
 
+<MessageCircle size={24} />
 function QuotationPreview({
     business,
     customer,
@@ -226,7 +228,7 @@ function QuotationPreview({
 
                                 <thead>
 
-                                    <tr className="bg-[#111] text-white">
+                                    <tr className="bg-[#111] text-white ">
 
                                         <th className="text-left px-4 py-3 rounded-l-lg">
                                             Product
@@ -326,7 +328,7 @@ function QuotationPreview({
                                     </span>
 
                                     <span>
-                                        ₹
+                                        
                                         {subtotal.toLocaleString(
                                             "en-IN"
                                         )}
@@ -342,7 +344,7 @@ function QuotationPreview({
                                     </span>
 
                                     <span>
-                                        ₹
+                                        
                                         {discount.toLocaleString(
                                             "en-IN"
                                         )}
@@ -358,7 +360,7 @@ function QuotationPreview({
                                     </span>
 
                                     <span>
-                                        ₹
+                                        
                                         {gstAmount.toLocaleString(
                                             "en-IN"
                                         )}
@@ -374,7 +376,7 @@ function QuotationPreview({
                                     </span>
 
                                     <span className="text-lg font-bold">
-                                        ₹
+                                        
                                         {total.toLocaleString(
                                             "en-IN"
                                         )}
@@ -394,12 +396,10 @@ function QuotationPreview({
                         <div className="border-t border-gray-200 mt-12 pt-5">
 
                             <p className="text-sm font-medium">
-                                Thank you for your business!
+                                Thank you !!!
                             </p>
 
-                            <p className="text-xs text-gray-400 mt-1">
-                                This quotation is system generated.
-                            </p>
+                            
 
                         </div>
 
@@ -473,7 +473,7 @@ function QuotationPreview({
                     DOWNLOAD
                 ============================ */}
 
-                <div className="mt-6">
+                <div className="mt-6 flex gap-4">
 
                     <PDFDownloadLink
                         document={
@@ -500,7 +500,9 @@ function QuotationPreview({
                             }.pdf`}
                         className="
                             block
+                            flex-1
                             w-full
+                            h-14
                             text-center
                             bg-blue-600
                             hover:bg-blue-700
@@ -518,6 +520,44 @@ function QuotationPreview({
                                 : "📥 Download PDF"
                         }
                     </PDFDownloadLink>
+
+                    {/* <div>
+                        <button className="
+                        resize
+                        
+                            block
+                            w-full
+                            h-14
+                            flex1
+                            text-center
+                            bg-green-600
+                            hover:-emerald-700
+                            text-white
+                            font-semibold
+                            px-5
+                            
+                            rounded-2xl
+                            transition
+                        "> share it <span>---!!</span><br /> <MessageCircle  size={24} color="white" /></button>
+                    </div> */}
+                    <div>
+                        <button className="
+                            block
+                            w-full
+                            flex1
+                            h-14
+                            text-center
+                            bg-red-600
+                            hover:bg-blue-700
+                            text-white
+                            font-semibold
+                            px-5
+                            py-4
+                            rounded-2xl
+                            transition
+                            overflow-hidden
+                        ">--Add Notes:</button>
+                    </div>
 
                 </div>
 

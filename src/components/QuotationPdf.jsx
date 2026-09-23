@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
     },
 
     smallText: {
-        fontSize: 9,
+        fontSize: 12,
         color: "#666",
         marginTop: 4,
     },
@@ -266,11 +266,11 @@ function QuotationPdf({
                                 </Text>
 
                                 <Text style={styles.rate}>
-                                    Rs.{rate.toLocaleString("en-IN")}
+                                    {rate.toLocaleString("en-IN")}
                                 </Text>
 
                                 <Text style={styles.amount}>
-                                    Rs.{amount.toLocaleString("en-IN")}
+                                    {amount.toLocaleString("en-IN")}
                                 </Text>
 
                             </View>
